@@ -19,14 +19,18 @@ units = []
 surf = []
 kg = []
 time = []
+nottime = []
 for pool in pool_dict[1:]:
     poolname.append(pool['label'])
     unit = rd.randint(5, 30)
     units.append(unit)
     surf.append(unit*rd.gauss(80, 20))
     kg.append(unit*rd.gauss(400, 100))
-    time.append(5+abs(unit*rd.gauss(30, 20)))
-pool_uses = pd.DataFrame({'Pool': poolname, 'Units': units, 'Surface': surf, 'Weight': kg, 'Time': time})
+    r = abs(19 - rd.gauss(10, 5))
+    time.append(r if 0 < r < 24 else 24)
+    nottime.append(24 - r)
+pool_uses = pd.DataFrame({'Pool': poolname, 'Units': units, 'Surface': surf, 'Weight': kg,
+                          'Time': time, 'Nottime': nottime})
 pool_uses.set_index('Pool')
 
 

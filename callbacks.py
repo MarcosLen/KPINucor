@@ -97,19 +97,17 @@ def draw_main_graph(tab, extra_filt):
         }
 
     elif tab == 'tab2':
-        data = []
-        for col in pool_temp:
-            x = pool_temp[col].index
-            y = pool_temp[col].values
-            data.append({'x': x, 'y': y, 'name': col, 'mode': 'lines'})
-        if extra_filt != 'All':
-            data = [data[i] for i in range(len(pool_dict)) if pool_dict[i]['value'] == extra_filt]
+        x = pool_uses['Pool']
+        y = pool_uses['Time']
+        y2 = pool_uses['Nottime']
+        data = [{'x': x, 'y': y, 'type': 'bar', 'name': 'Used Time', 'opacity': 0.85},
+                {'x': x, 'y': y2, 'type': 'bar', 'name': 'Not Used Time', 'opacity': 0.6}]
         return {
             'data': data,
-            'layout': {'showlegend': True,
-                       'title': 'Pool Temperature',
+            'layout': {'title': 'Time usage by pool',
                        'paper_bgcolor': '#F9F9F9',
-                       'plot_bgcolor': '#F9F9F9'}
+                       'plot_bgcolor': '#F9F9F9',
+                       'barmode': 'stack'}
         }
     elif tab == 'tab3':
         # data = real_production[(real_production['Day'] > datetime.datetime.strptime(start_date, '%Y-%m-%d')) &

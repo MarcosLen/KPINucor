@@ -12,7 +12,7 @@ app.config.suppress_callback_exceptions = True
 body = html.Div([
     html.Div([], className='col-1'),
     html.Div([
-        dcc.Tabs(id='tab_selector', value='tab3', children=[
+        dcc.Tabs(id='tab_selector', value='tab2', children=[
             dcc.Tab(label='General information', value='tab1',
                     style={'backgroundColor': '#E7E7E7'},
                     selected_style={'backgroundColor': '#F9F9F9'}),
