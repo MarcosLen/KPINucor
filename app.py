@@ -2,10 +2,12 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
+from dash_bootstrap_templates import load_figure_template
 
+app = dash.Dash(__name__, serve_locally=True, suppress_callback_exceptions=True,)
+                # external_stylesheets=[dbc.themes.LUX])
 
-app = dash.Dash(__name__, serve_locally=True,
-                external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+load_figure_template("lux")
 server = app.server
 server.config.update(SECRET_KEY="nnnnnn")
 
