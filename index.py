@@ -4,19 +4,9 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output
 
 from app import app
-import layouts
+from layouts import index_page
 
 app.config.suppress_callback_exceptions = True
-
-index_page = html.Div([
-    dcc.Location(id='url', pathname='/kpi', refresh=True),
-    layouts.header,
-    html.Hr(),
-    layouts.body,
-    html.Div([
-
-    ], style={})
-])
 
 
 @app.callback(Output('page-content', 'children'),

@@ -13,7 +13,6 @@ app.config.suppress_callback_exceptions = True
 
 
 graph_std_layout = {'margin': {'l': 35, 'r': 10, 't': 45, 'b': 30}, 'showlegend': True,
-                    # 'paper_bgcolor': '#F9F9F9', 'plot_bgcolor': '#F9F9F9',
                     'legend': {'itemclick': False, 'itemdoubleclick': False},
                     'xaxis': {'tickangle': 45}}
 
@@ -267,7 +266,7 @@ def pool_graphs(tab):
     if tab == 'tab2':
         for i in pool_uses.index:
             data.append('{}'.format(pool_uses['Units'][i]))
-            data.append('Processed surface: {:.2f}'.format(pool_uses['Surface'][i]))
-            data.append('Processed weight: {:.2f}'.format(pool_uses['Weight'][i]))
+            data.append('{:.2f}'.format(pool_uses['Surface'][i]))
+            data.append('{:.2f}'.format(pool_uses['Weight'][i]))
         return data
     return ['' for _ in range(len(pool_uses.index)) for _ in range(3)]
