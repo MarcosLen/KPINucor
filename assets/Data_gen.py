@@ -47,3 +47,36 @@ day = [datetime.datetime(2021, 5, 1) + datetime.timedelta(rd.randint(1, 30)) for
 shift = [rd.choice(['MS', 'AS', 'NS']) for _ in range(76)]
 production = {'Recipe': recipe, 'Day': day, 'Shift': shift}
 real_production = pd.DataFrame(production)
+
+
+def dist_data_n(a):
+    vals = [0, 0.5, 0.6, 1, 1.2, 1.5, 1.7, 2.1, 2.5, 2.8]
+    p = rd.randint(0, 100)
+    if p < 20:
+        j = rd.choice(vals)
+        val = j if a == 0 and p < 15 else 0
+    else:
+        val = a
+    return val
+
+
+def dist_data_gen(n):
+    data = []
+    vals = [0, 0.5, 0.6, 1, 1.2, 1.5, 1.7, 2.1, 2.5, 2.8]
+    data.append(rd.choice(vals))
+    for i in range(n):
+        p = rd.randint(0, 100)
+        if p < 20:
+            data.append(rd.choice(vals) if data[i] == 0 and p < 15 else 0)
+        else:
+            data.append(data[i])
+    return data
+
+x = [x for x in range(60)]
+distance_data = [
+            {'x': x, 'y': dist_data_gen(60), 'name': 'Trolley_1', 'line_shape': 'hv'},
+            {'x': x, 'y': dist_data_gen(60), 'name': 'Trolley_2', 'line_shape': 'hv'},
+            {'x': x, 'y': dist_data_gen(60), 'name': 'Trolley_3', 'line_shape': 'hv'},
+            {'x': x, 'y': dist_data_gen(60), 'name': 'Trolley_4', 'line_shape': 'hv'}
+        ]
+

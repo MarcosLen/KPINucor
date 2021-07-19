@@ -11105,3 +11105,42 @@ legend {
 .list-group-item .h6 {
   color: inherit;
 }
+
+
+/* Set the current outer border to 0 because it's messed up,
+and put the FLATLY properties inside the DateInput_input class
+which works well instead. */
+.DatePickerRangeInput {
+  border: 0px transparent;
+}
+
+.DateRangePickerInput__withBorder {
+  border: 1px solid #000;
+  border-radius: 0.15rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-align: center;
+}
+
+.DateRangePickerInput_arrow_svg_1 {
+  height: 20px;
+  font-size: 6px;
+}
+
+/* Fix box width of datepicker to be 100% of parent container*/
+.DateInput, .DateInput_1 {
+  width: 40%; /* replace with whatever length you prefer */
+}
+
+/* Fix the font size and other stuff of datepicker*/
+.DateInput_input, .DateInput_input_1 {
+  /* my personal stuff */
+  text-align: center;
+  line-height: calc(1.5em + 0.75rem);
+  /* default flatly stuff */
+  height: calc(1.5em + 0.75rem + 2px);
+  font-size: 0.93rem;
+  font-weight: 400;
+  color: #7b8a8b;
+  background-color: #fff;
+  background-clip: padding-box;
+}

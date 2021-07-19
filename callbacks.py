@@ -6,13 +6,23 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from controls import pool_dict, trolley_dict, RECIPES
-from assets.Data_gen import pool_temp, pool_uses, failures, recipes_used, real_production
+from assets.Data_gen import pool_temp, pool_uses, failures, recipes_used, real_production, dist_data_n
 import datetime
+from collections import deque
 
 app.config.suppress_callback_exceptions = True
+X = deque(maxlen=20)
+X.append(0)
+Y0 = deque(maxlen=20)
+Y0.append(0)
+Y1 = deque(maxlen=20)
+Y1.append(0)
+Y2 = deque(maxlen=20)
+Y2.append(0)
+Y3 = deque(maxlen=20)
+Y3.append(0)
 
-
-graph_std_layout = {'margin': {'l': 35, 'r': 10, 't': 45, 'b': 30}, 'showlegend': True,
+graph_std_layout = {'margin': {'l': 25, 'r': 5, 't': 10, 'b': 0}, 'showlegend': True,
                     'legend': {'itemclick': False, 'itemdoubleclick': False},
                     'xaxis': {'tickangle': 45}}
 
@@ -22,13 +32,10 @@ graph_std_layout = {'margin': {'l': 35, 'r': 10, 't': 45, 'b': 30}, 'showlegend'
                Output('extra_filter', 'hidden')],
               Input('tab_selector', 'active_tab'))
 def extra_filter(tab):
-    if tab == 'tab1':
-        return ['', [], True]
     if tab == 'tab2':
         return ['Filter by pool', pool_dict, False]
-    elif tab == 'tab4':
-        return ['Filter by Trolley', trolley_dict, False]
-    return ['', [], True]
+    else:
+        return ['', [], True]
 
 
 @app.callback([Output('div3_trolley', 'hidden'),
@@ -80,18 +87,20 @@ def title_values(tab, figure):
     return 'error', 'error', 'error'
 
 
-@app.callback(Output('main_graph', 'figure'),
+@app.callback([Output('main_graph', 'figure'),
+               Output('main_graph_title', 'children')],
               [Input('tab_selector', 'active_tab'),
-               Input('extra_filter_dropdown', 'value')])
-def draw_main_graph(tab, extra_filt):
+               Input('extra_filter_dropdown', 'value'),
+               Input('interval_comp', 'n_intervals')])
+def draw_main_graph(tab, extra_filt, n):
     if tab == 'tab1':
         x = pool_uses['Pool']
         y = pool_uses['Time']
         data = [{'x': x, 'y': y, 'type': 'bar'}]
         fig = go.Figure(data=data)
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Time usage by pool', 'showlegend': False}, title_font_size=18)
-        return fig
+        fig.update_layout({'showlegend': False})
+        return fig, 'Time usage by pool'
 
     elif tab == 'tab2':
         x = pool_uses['Pool']
@@ -101,8 +110,8 @@ def draw_main_graph(tab, extra_filt):
                 {'x': x, 'y': y2, 'type': 'bar', 'name': 'Not Used Time', 'opacity': 0.6, 'marker': {'color': '#7a7e85'}}]
         fig = go.Figure(data=data)
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Time usage by pool', 'barmode': 'stack'}, title_font_size=18)
-        return fig
+        fig.update_layout({'barmode': 'stack'})
+        return fig, 'Time usage by pool'
 
     elif tab == 'tab3':
         # data = real_production[(real_production['Day'] > datetime.datetime.strptime(start_date, '%Y-%m-%d')) &
@@ -110,44 +119,36 @@ def draw_main_graph(tab, extra_filt):
         data = [{'x': recipes_used['Recipe'], 'y': recipes_used['Times'], 'type': 'bar'}]
         fig = go.Figure(data=data)
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Recipes Produced', 'showlegend': False}, title_font_size=18)
+        fig.update_layout({'showlegend': False})
         fig.update_xaxes(tickangle=45)
-        return fig
+        return fig, 'Recipes Produced'
 
     elif tab == 'tab4':
-        x = [x for x in range(18)]
         fig = go.Figure()
-        data = [{'x': x, 'y': [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 1.8, 1.8, 1.8, 1.8, 0, 0, 0], 'name': 'Trolley_1', 'line_shape': 'hv'},  #  'mode': 'lines',
-                {'x': x, 'y': [1, 1, 1, 1, 1, 2.5, 2.5, 2.5, 2.5, 0, 0, 0, 0, 2.4, 2.4, 2.4, 2.4, 0], 'name': 'Trolley_2', 'line_shape': 'hv'},
-                {'x': x, 'y': [0, 0, 1.6, 1.6, 0, 0, 0, 0, 0, 0.6, 0.6, 0, 0, 0, 0, 0], 'name': 'Trolley_3', 'line_shape': 'hv'},
-                {'x': x, 'y': [0, 0.7, 0.7, 0, 0, 0, 3, 3, 3, 3, 0, 0, 1, 1, 1, 1, 1, 0], 'name': 'Trolley_4', 'line_shape': 'hv'}]
-        fig.add_trace(go.Scatter(data[0]))
-        fig.add_trace(go.Scatter(data[1]))
-        fig.add_trace(go.Scatter(data[2]))
-        fig.add_trace(go.Scatter(data[3]))
-        # if extra_filt == 'T1':
-        #     data = [data[0]]
-        # elif extra_filt == 'T2':
-        #     data = [data[1]]
-        # elif extra_filt == 'T3':
-        #     data = [data[2]]
-        # elif extra_filt == 'T4':
-        #     data = [data[3]]
+        X.append(X[-1]+1)
+        Y0.append(dist_data_n(Y0[-1]))
+        Y1.append(dist_data_n(Y1[-1]))
+        Y2.append(dist_data_n(Y2[-1]))
+        Y3.append(dist_data_n(Y3[-1]))
 
+        fig.add_trace(go.Scatter({'x': list(X), 'y': list(Y0), 'name': 'Trolley_1', 'line_shape': 'hv'}))
+        fig.add_trace(go.Scatter({'x': list(X), 'y': list(Y1), 'name': 'Trolley_2', 'line_shape': 'hv'}))
+        fig.add_trace(go.Scatter({'x': list(X), 'y': list(Y2), 'name': 'Trolley_3', 'line_shape': 'hv'}))
+        fig.add_trace(go.Scatter({'x': list(X), 'y': list(Y3), 'name': 'Trolley_4', 'line_shape': 'hv'}))
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Energy (weight/km)', 'hovermode': 'x',
-                           'hoverdistance': 100, 'spikedistance': 1000}, title_font_size=18)
+        fig.update_layout({'hovermode': 'x', 'hoverdistance': 100, 'spikedistance': 1000})
         fig.update_xaxes({'title': 'distance (km)', 'type': 'linear', 'tickmode': 'linear',
-                          'tick0': 0, 'dtick': 1, 'showticklabels': True, 'tickangle': 0})
-        fig.update_yaxes({'title': 'weight (kg)', 'type': 'linear'})
-        return fig
+                          'tick0': 0, 'dtick': 1, 'showticklabels': True, 'tickangle': 0, 'range': [min(X), max(X)]})
+        fig.update_yaxes({'title': 'weight (kg)', 'type': 'linear', 'range': [0, 3]})
+        return fig, 'Energy (weight/km)'
 
     fig = go.Figure()
     fig.update_layout(graph_std_layout)
-    return fig
+    return fig, 'Error'
 
 
-@app.callback(Output('small_graph_1', 'figure'),
+@app.callback([Output('small_graph_1', 'figure'),
+               Output('sm_graph_1_title', 'children')],
               [Input('tab_selector', 'active_tab')])
 def draw_small_graph_1(tab):
     if tab == 'tab1':
@@ -159,10 +160,9 @@ def draw_small_graph_1(tab):
             total = total + time
             data.append([name, time])
         datatot = pd.DataFrame(data, columns=['Pool', 'Time'])
-        fig = px.pie(datatot, title='Pool usage ratio', values='Time', names='Pool')
+        fig = px.pie(datatot, values='Time', names='Pool')
         fig.update_layout(graph_std_layout)
-        fig.update_layout(title_font_size=18)
-        return fig
+        return fig, 'Pool usage ratio'
 
     if tab == 'tab4':
         x = [x for x in range(11)]
@@ -177,24 +177,23 @@ def draw_small_graph_1(tab):
         data4 = sum(data[3]['y'])
         datatot = pd.DataFrame([['Trolley 1', data1], ['Trolley 2', data2], ['Trolley 3', data3], ['Trolley 4', data4]],
                                columns=['Trolley', 'Value'])
-        fig = px.pie(datatot, title='Usage ratio', values='Value', color='Trolley', names='Trolley')
+        fig = px.pie(datatot, values='Value', color='Trolley', names='Trolley')
         fig.update_layout(graph_std_layout)
-        fig.update_layout(title_font_size=18)
-        return fig
+        return fig, 'Usage ratio'
     return {'data': [],
-            'layout': {}}
+            'layout': {}}, ''
 
 
-@app.callback(Output('small_graph_2', 'figure'),
+@app.callback([Output('small_graph_2', 'figure'),
+              Output('sm_graph_2_title', 'children')],
               [Input('tab_selector', 'active_tab')])
 def draw_main_graph(tab):
     if tab == 'tab1':
         data = [{'x': failures['Failure'], 'y': failures['Times'], 'type': 'bar'}]
         fig = go.Figure(data=data)
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Failures', 'showlegend': False})
-        fig.update_layout(title_font_size=18)
-        return fig
+        fig.update_layout({'showlegend': False})
+        return fig, 'Failures'
     elif tab == 'tab4':
         x = ['Trolley 1', 'Trolley 2', 'Trolley 3', 'Trolley 4']
         data = [go.Bar(name='Auto', x=x, y=[75, 85, 25, 50]),
@@ -203,23 +202,23 @@ def draw_main_graph(tab):
         fig = go.Figure(data=data)
         fig.update_layout(barmode='group')
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Usage mode'}, title_font_size=18)
-        return fig
+        return fig, 'Usage mode'
     else:
         return {'data': [],
-                'layout': {}}
+                'layout': {}}, ''
 
 
-@app.callback(Output('small_graph_3', 'figure'),
+@app.callback([Output('small_graph_3', 'figure'),
+              Output('sm_graph_3_title', 'children')],
               [Input('tab_selector', 'active_tab')])
 def graph_small_graph_3(tab):
     if tab == 'tab1':
         data = [{'x': recipes_used['Recipe'], 'y': recipes_used['Times'], 'type': 'bar'}]
         fig = go.Figure(data=data)
         fig.update_layout(graph_std_layout)
-        fig.update_layout({'title': 'Recipes Completed', 'showlegend': False}, title_font_size=18)
+        fig.update_layout({'showlegend': False})
         fig.update_xaxes(tickangle=45)
-        return fig
+        return fig, 'Recipes Completed'
     elif tab == 'tab4':
         data = [{'Auto': 75, 'Manual': 20, 'Emergency': 5},
                 {'Auto': 85, 'Manual': 15, 'Emergency': 0},
@@ -230,12 +229,11 @@ def graph_small_graph_3(tab):
         data3 = ['Emergency', sum(data[i]['Emergency'] for i in range(len(data)))]
 
         datatot = pd.DataFrame([data1, data2, data3], columns=['Mode', 'Value'])
-        fig = px.pie(datatot, title='Usage mode ratio', values='Value', color='Mode', names='Mode')
+        fig = px.pie(datatot, values='Value', color='Mode', names='Mode')
         fig.update_layout(graph_std_layout)
-        fig.update_layout(title_font_size=18)
-        return fig
+        return fig, 'Usage mode ratio'
     return {'data': [],
-            'layout': {}}
+            'layout': {}}, ''
 
 
 @app.callback([Output('pool_graph{}'.format(i+1), 'figure') for i in range(len(pool_temp.columns))],
@@ -252,7 +250,6 @@ def pool_graphs(tab):
             data = [{'x': x, 'y': y, 'name': col, 'mode': 'lines'}]
             fig = go.Figure(data=data)
             fig.update_layout(this_graph_layout)
-            fig.update_layout({'title': 'TEMPERATURE:'}, title_font_size=14)
             ret.append(fig)
         return ret
     return [{'data': [], 'layout': graph_std_layout} for _ in range(len(pool_temp.columns))]
